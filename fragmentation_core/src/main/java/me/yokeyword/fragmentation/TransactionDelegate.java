@@ -603,6 +603,10 @@ class TransactionDelegate {
         final View fromView = from.getView();
         if (fromView == null) return;
 
+        if (fromView.getAnimation() != null) {//fix github issueID:1139
+            fromView.clearAnimation();
+        }
+
         container.removeViewInLayout(fromView);
         final ViewGroup mock = addMockView(fromView, container);
 
@@ -665,17 +669,17 @@ class TransactionDelegate {
 
             }
         });
-        fromView.startAnimation(animation);
-//        mHandler.postDelayed(new Runnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    mock.removeViewInLayout(fromView);
-//                    container.removeViewInLayout(mock);
-//                } catch (Exception ignored) {
-//                }
-//            }
-//        }, animation.getDuration());
+        mock.startAnimation(animation);
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mock.removeViewInLayout(fromView);
+                    container.removeViewInLayout(mock);
+                } catch (Exception ignored) {
+                }
+            }
+        }, animation.getDuration());
     }
 
 
@@ -687,18 +691,23 @@ class TransactionDelegate {
         final View fromView = fromF.getView();
         if (fromView == null) return;
 
+        if (fromView.getAnimation() != null){//fix github issueID:1139
+            fromView.clearAnimation();
+        }
+
         container.removeViewInLayout(fromView);
         final ViewGroup mock = addMockView(fromView, container);
 
         to.getSupportDelegate().mEnterAnimListener = new SupportFragmentDelegate.EnterAnimListener() {
             @Override
             public void onEnterAnimStart() {
-                fromView.startAnimation(exitAnim);
-
+//                fromView.startAnimation(exitAnim);
+                mock.startAnimation(exitAnim);
                 mHandler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
                         try {
+                            mock.clearAnimation();
                             mock.removeViewInLayout(fromView);
                             container.removeViewInLayout(mock);
                         } catch (Exception ignored) {
