@@ -621,18 +621,61 @@ class TransactionDelegate {
         } else {
             animation = AnimationUtils.loadAnimation(mActivity, popAnim);
         }
-
-        fromView.startAnimation(animation);
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    mock.removeViewInLayout(fromView);
-                    container.removeViewInLayout(mock);
-                } catch (Exception ignored) {
-                }
+//        当前方法执行在MainThread，所以立即执行移除视图
+        if (animation.getDuration() == 0) {
+            try {
+                mock.removeViewInLayout(fromView);
+                container.removeView(mock);
+            } catch (Exception ignored) {
             }
-        }, animation.getDuration());
+            return;
+        }
+        if (from.isDetached()) {
+            try {
+//                Log.w(TAG, "mockPopToAnim: from.isDetached() = true,删除视图" );
+                mock.removeViewInLayout(fromView);
+                container.removeView(mock);
+            } catch (Exception ignored) {
+            }
+            return;
+        }
+        animation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            mock.removeViewInLayout(fromView);
+                            //会出现视图没有更新的问题
+                            //container.removeViewInLayout(mock);
+                            container.removeView(mock);
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }, animation.getDuration());
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+        fromView.startAnimation(animation);
+//        mHandler.postDelayed(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    mock.removeViewInLayout(fromView);
+//                    container.removeViewInLayout(mock);
+//                } catch (Exception ignored) {
+//                }
+//            }
+//        }, animation.getDuration());
     }
 
 
