@@ -63,6 +63,7 @@ dependencies {
     // EventBus
     compile project(':eventbus_activity_scope')
     compile 'org.greenrobot:eventbus:3.0.0'
+    implementation project(path: ':fragmentation_core')
     //    apt 'org.greenrobot:eventbus-annotation-processor:3.0.1'
 }
 
